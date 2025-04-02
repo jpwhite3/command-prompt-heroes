@@ -172,7 +172,7 @@ button:active {
 }
 
 #leaderboard-list {
-    list-style-type: decimal;
+    list-style-type: none;
     padding-left: 40px; /* Indent list */
     text-align: left;
     max-width: 300px; /* Limit width */
