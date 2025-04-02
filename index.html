@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[>_] COMMAND_LINE HEROES</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="crt-monitor">
+        <div id="screen">
+            <div id="title-screen" class="game-screen active">
+                <img id="game-title" src="title-screen.png" alt="Title Screen Logo">
+                <p>Loading System...</p>
+            </div>
+
+            <div id="menu-screen" class="game-screen">
+                <h2>-- Main Menu --</h2>
+                <button id="new-game-btn">Start New Game</button>
+                <button id="leaderboard-btn">View Leaderboard</button>
+            </div>
+
+            <div id="instructions-screen" class="game-screen">
+                <h2>-- Instructions --</h2>
+                <p>Objective: Type as many valid CLI commands as possible in 60 seconds!</p>
+                <p>Recognized Ecosystems: Windows (CMD), Linux, Git, Docker, Kubernetes.</p>
+                <p>Rules:</p>
+                <ul>
+                    <li>Type a command and press Enter.</li>
+                    <li>You get points for each command recognized in ANY ecosystem.</li>
+                    <li>The timer starts when you click "Yes".</li>
+                </ul>
+                <p>Are you ready?</p>
+                <button id="ready-yes-btn">Yes</button>
+                <button id="ready-no-btn">No (Back to Menu)</button>
+            </div>
+
+            <div id="game-screen" class="game-screen">
+                <div id="game-hud">
+                    <span>Time: <span id="time-left">60</span>s</span>
+                    <span>Score: <span id="current-score">0</span></span>
+                </div>
+                <div id="output-area">
+                    </div>
+                <div id="input-line">
+                    <span>&gt;</span> <input type="text" id="command-input" autofocus autocomplete="off">
+                </div>
+            </div>
+
+            <div id="game-over-screen" class="game-screen">
+                <h2>-- Game Over --</h2>
+                <p>Final Score: <span id="final-score">0</span></p>
+                <label for="player-name">Enter your name for the Leaderboard:</label>
+                <input type="text" id="player-name" maxlength="10">
+                <button id="submit-score-btn">Submit Score</button>
+                <button id="back-to-menu-btn">Back to Menu</button>
+            </div>
+
+            <div id="leaderboard-screen" class="game-screen">
+                <h2>-- Leaderboard --</h2>
+                <ol id="leaderboard-list">
+                    </ol>
+                <button id="menu-from-leaderboard-btn">Back to Menu</button>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
