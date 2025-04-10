@@ -3,6 +3,8 @@
 
 Welcome to **Command Prompt Heroes: The Oracle of Lost Knowledge**, a narrative-driven, gamified coding workshop designed for beginners and low-code professionals. This experience teaches command prompt literacy, Python fundamentals, and automation through a futuristic story where participants unlock forgotten technologies and reclaim the lost art of coding.
 
+![comic-intro-portrait](./assets/images/comic-intro-portrait.png)
+
 ---
 
 ## Table of Contents
