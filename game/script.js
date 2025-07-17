@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const menuScreen = document.getElementById('menu-screen');
     const instructionsScreen = document.getElementById('instructions-screen');
     const gameScreen = document.getElementById('game-screen');
+    const interstitialGameOverScreen = document.getElementById('interstitial-game-over-screen');
     const gameOverScreen = document.getElementById('game-over-screen');
     const leaderboardScreen = document.getElementById('leaderboard-screen');
 
@@ -159,10 +160,15 @@ document.addEventListener('DOMContentLoaded', () => {
         clearInterval(timerInterval);
         timerInterval = null;
         commandInput.disabled = true;
-        finalScoreDisplay.textContent = score;
-        playerNameInput.value = ''; // Clear previous name
-        showScreen(gameOverScreen);
-        // Focus handled by showScreen now
+
+        showScreen(interstitialGameOverScreen);
+
+        setTimeout(() => {
+            finalScoreDisplay.textContent = score;
+            playerNameInput.value = ''; // Clear previous name
+            showScreen(gameOverScreen);
+            // Focus handled by showScreen now
+        }, 2000); // Show "Game Over" for 2 seconds
     }
 
     // Reset game state for a new game
