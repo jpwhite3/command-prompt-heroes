@@ -83,6 +83,12 @@ img#game-title {
     height: 100%;
 }
 
+#menu-title-image {
+    width: 80%;
+    max-width: 400px;
+    margin-bottom: 20px;
+}
+
 #game-over-splash-screen .screen-content {
     display: flex;
     flex-direction: column;
