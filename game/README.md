@@ -41,7 +41,7 @@ A retro-style terminal emulator game where players have 60 seconds to type as ma
 
 ### Demo Mode
 
-For a bit of fun, a hidden "demo mode" can be activated by entering the Konami code (`Up, Down, Up, Down, Left, Right, Left, Right, B, A, Enter`) during gameplay. When activated:
+For a bit of fun, a hidden "demo mode" can be activated by entering the Konami code (`Up, Up, Down, Down, Left, Right, Left, Right, B, A`) during gameplay. When activated:
 
 - The game will play itself in a continuous loop, entering random commands from the library.
 - The "DEMO MODE" indicator will appear at the top of the screen.

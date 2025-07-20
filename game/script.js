@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const GAME_DURATION_SECONDS = 60;
   const LEADERBOARD_KEY = 'commandLineHeroLeaderboard';
   const STATS_KEY = 'commandLineHeroStats';
-  const konamiCode = ['ArrowUp', 'ArrowDown', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a', 'Enter'];
+  const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
 
   // --- Game State ---
   let score = 0;
@@ -366,6 +366,9 @@ document.addEventListener('DOMContentLoaded', () => {
   leaderboardBtn.addEventListener('click', () => {
     loadGameData();
     displayLeaderboard();
+  });
+  demoModeBtn.addEventListener('click', () => {
+    activateDemoMode();
   });
   readyYesBtn.addEventListener('click', startGame);
   readyNoBtn.addEventListener('click', showMenu);
