@@ -38,7 +38,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const konamiCode = ['ArrowUp', 'ArrowDown', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a', 'Enter'];
 
   // --- Game State ---
-  // commandDatabase is now loaded from commands.js
   let score = 0;
   let timeLeft = GAME_DURATION_SECONDS;
   let timerInterval = null;
@@ -47,6 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let konamiIndex = 0;
   let isDemoMode = false;
   let demoModeInterval = null;
+  let typingInterval = null;
 
   // --- Functions ---
 
@@ -97,7 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function saveGameData() {
-    if (isDemoMode) return; // Do not save any data in demo mode
+    if (isDemoMode) return;
     try {
       leaderboard.sort((a, b) => b.score - a.score);
       localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(leaderboard));
@@ -153,17 +153,21 @@ document.addEventListener('DOMContentLoaded', () => {
   function endGame() {
     clearInterval(timerInterval);
     timerInterval = null;
+    if (typingInterval) {
+        clearInterval(typingInterval);
+        typingInterval = null;
+    }
 
     if (isDemoMode) {
-        resetGame(true); // Keep demo mode active
+        resetGame(true);
         startTimer();
         const allCommands = Object.values(commandDatabase).flat();
         demoModeInterval = setInterval(() => {
             if (timeLeft > 0) {
                 const randomCommand = allCommands[Math.floor(Math.random() * allCommands.length)];
-                processCommand(randomCommand);
+                simulateTyping(randomCommand);
             }
-        }, 1500);
+        }, 2500); // Start typing a new command every 2.5 seconds
         return;
     }
 
@@ -194,6 +198,10 @@ document.addEventListener('DOMContentLoaded', () => {
     commandInput.value = '';
     commandInput.disabled = false;
     konamiIndex = 0;
+    if (typingInterval) {
+        clearInterval(typingInterval);
+        typingInterval = null;
+    }
     if (!keepDemoMode) {
         isDemoMode = false;
         demoModeIndicator.style.display = 'none';
@@ -214,6 +222,25 @@ document.addEventListener('DOMContentLoaded', () => {
     startTimer();
   }
 
+  function simulateTyping(command) {
+    let i = 0;
+    commandInput.value = '';
+    if (typingInterval) {
+        clearInterval(typingInterval);
+    }
+    typingInterval = setInterval(() => {
+        if (i < command.length) {
+            commandInput.value += command.charAt(i);
+            i++;
+        } else {
+            clearInterval(typingInterval);
+            typingInterval = null;
+            processCommand(command);
+            commandInput.value = '';
+        }
+    }, 100); // Typing speed
+  }
+
   function activateDemoMode() {
     isDemoMode = true;
     demoModeIndicator.style.display = 'block';
@@ -223,9 +250,9 @@ document.addEventListener('DOMContentLoaded', () => {
     demoModeInterval = setInterval(() => {
         if (timeLeft > 0) {
             const randomCommand = allCommands[Math.floor(Math.random() * allCommands.length)];
-            processCommand(randomCommand);
+            simulateTyping(randomCommand);
         }
-    }, 1500);
+    }, 2500);
   }
   
   function exitDemoMode() {
@@ -239,7 +266,11 @@ document.addEventListener('DOMContentLoaded', () => {
         clearInterval(demoModeInterval);
         demoModeInterval = null;
     }
-    resetGame(); // Full reset
+    if (typingInterval) {
+        clearInterval(typingInterval);
+        typingInterval = null;
+    }
+    resetGame();
     showMenu();
   }
 
