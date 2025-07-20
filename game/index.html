@@ -23,7 +23,7 @@
             <div id="instructions-screen" class="game-screen">
                 <h2>-- Instructions --</h2>
                 <p>Objective: Type as many valid CLI commands as possible in 60 seconds!</p>
-                <p>Recognized Ecosystems: Windows (CMD), Linux, Git, Docker, Kubernetes.</p>
+                <p>Recognized Ecosystems: <span id="ecosystem-list"></span>.</p>
                 <p>Rules:</p>
                 <ul>
                     <li>Type a command and press Enter.</li>
@@ -38,12 +38,22 @@
             <div id="game-screen" class="game-screen">
                 <div id="game-hud">
                     <span>Time: <span id="time-left">60</span>s</span>
+                    <span id="demo-mode-indicator" style="display: none;">-- DEMO MODE --</span>
                     <span>Score: <span id="current-score">0</span></span>
                 </div>
                 <div id="output-area">
                     </div>
                 <div id="input-line">
                     <span>&gt;</span> <input type="text" id="command-input" autofocus autocomplete="off">
+                </div>
+            </div>
+
+            <div id="game-over-splash-screen" class="game-screen">
+                <div class="screen-content">
+                    <h1>GAME OVER</h1>
+                    <div class="final-score-display">
+                        <h2>Final Score: <span id="final-score-splash">0</span></h2>
+                    </div>
                 </div>
             </div>
 
@@ -58,13 +68,19 @@
 
             <div id="leaderboard-screen" class="game-screen">
                 <h2>-- Leaderboard --</h2>
+                <p>Total Games Played: <span id="games-played-count">0</span></p>
                 <ul id="leaderboard-list"></ul>
-                <button id="menu-from-leaderboard-btn">Back to Menu</button>
+                <div class="leaderboard-actions">
+                    <button id="download-data-btn">Download Data</button>
+                    <button id="reset-data-btn">Reset Data</button>
+                    <button id="menu-from-leaderboard-btn">Back to Menu</button>
+                </div>
             </div>
 
         </div>
     </div>
 
+    <script src="commands.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

@@ -83,6 +83,31 @@ img#game-title {
     height: 100%;
 }
 
+#game-over-splash-screen .screen-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    text-align: center;
+}
+
+#game-over-splash-screen h1 {
+    font-size: 60px; /* Larger font size */
+    margin-bottom: 20px;
+    animation: fadeIn 1s ease-in;
+}
+
+#game-over-splash-screen h2 {
+    font-size: 30px;
+    animation: fadeIn 2s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
 #menu-screen, #instructions-screen, #game-over-screen, #leaderboard-screen {
     align-items: center;
     text-align: center;
@@ -129,6 +154,17 @@ button:active {
     border-bottom: 1px dashed #00ff00;
     padding-bottom: 5px;
     margin-bottom: 10px;
+}
+
+#game-hud span#demo-mode-indicator {
+    color: #ffcc00; /* Yellow/Gold for emphasis */
+    font-weight: bold;
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
 }
 
 #output-area {
@@ -223,6 +259,11 @@ ul li::before {
     content: "* ";
     color: #00ff00;
 }
+
+.leaderboard-actions {
+    margin-top: 20px;
+}
+
 /* --- Keyboard Focus Styles --- */
 button:focus,
 input[type="text"]:focus {

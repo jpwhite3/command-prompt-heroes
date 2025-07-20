@@ -1,356 +1,428 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- DOM Elements ---
-    const screens = document.querySelectorAll('.game-screen');
-    const titleScreen = document.getElementById('title-screen');
-    const menuScreen = document.getElementById('menu-screen');
-    const instructionsScreen = document.getElementById('instructions-screen');
-    const gameScreen = document.getElementById('game-screen');
-    const gameOverScreen = document.getElementById('game-over-screen');
-    const leaderboardScreen = document.getElementById('leaderboard-screen');
+  // --- DOM Elements ---
+  const screens = document.querySelectorAll('.game-screen');
+  const titleScreen = document.getElementById('title-screen');
+  const menuScreen = document.getElementById('menu-screen');
+  const instructionsScreen = document.getElementById('instructions-screen');
+  const gameScreen = document.getElementById('game-screen');
+  const gameOverSplashScreen = document.getElementById('game-over-splash-screen');
+  const finalScoreSplash = document.getElementById('final-score-splash');
+  const gameOverScreen = document.getElementById('game-over-screen');
+  const leaderboardScreen = document.getElementById('leaderboard-screen');
+  const demoModeIndicator = document.getElementById('demo-mode-indicator');
+  const ecosystemList = document.getElementById('ecosystem-list');
 
-    const newGameBtn = document.getElementById('new-game-btn');
-    const leaderboardBtn = document.getElementById('leaderboard-btn');
-    const readyYesBtn = document.getElementById('ready-yes-btn');
-    const readyNoBtn = document.getElementById('ready-no-btn');
-    const submitScoreBtn = document.getElementById('submit-score-btn');
-    const backToMenuBtn = document.getElementById('back-to-menu-btn'); // From Game Over
-    const menuFromLeaderboardBtn = document.getElementById('menu-from-leaderboard-btn');
+  const newGameBtn = document.getElementById('new-game-btn');
+  const leaderboardBtn = document.getElementById('leaderboard-btn');
+  const readyYesBtn = document.getElementById('ready-yes-btn');
+  const readyNoBtn = document.getElementById('ready-no-btn');
+  const submitScoreBtn = document.getElementById('submit-score-btn');
+  const backToMenuBtn = document.getElementById('back-to-menu-btn');
+  const menuFromLeaderboardBtn = document.getElementById('menu-from-leaderboard-btn');
+  const downloadDataBtn = document.getElementById('download-data-btn');
+  const resetDataBtn = document.getElementById('reset-data-btn');
 
-    const timeLeftDisplay = document.getElementById('time-left');
-    const currentScoreDisplay = document.getElementById('current-score');
-    const outputArea = document.getElementById('output-area');
-    const commandInput = document.getElementById('command-input');
-    const finalScoreDisplay = document.getElementById('final-score');
-    const playerNameInput = document.getElementById('player-name');
-    const leaderboardList = document.getElementById('leaderboard-list');
+  const timeLeftDisplay = document.getElementById('time-left');
+  const currentScoreDisplay = document.getElementById('current-score');
+  const outputArea = document.getElementById('output-area');
+  const commandInput = document.getElementById('command-input');
+  const finalScoreDisplay = document.getElementById('final-score');
+  const playerNameInput = document.getElementById('player-name');
+  const leaderboardList = document.getElementById('leaderboard-list');
+  const gamesPlayedCount = document.getElementById('games-played-count');
 
-    // --- Game Configuration ---
-    const GAME_DURATION_SECONDS = 60;
-    // Updated Leaderboard Key for the new game name
-    const LEADERBOARD_KEY = 'commandLineHeroLeaderboard';
+  // --- Game Configuration ---
+  const GAME_DURATION_SECONDS = 60;
+  const LEADERBOARD_KEY = 'commandLineHeroLeaderboard';
+  const STATS_KEY = 'commandLineHeroStats';
+  const konamiCode = ['ArrowUp', 'ArrowDown', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a', 'Enter'];
 
-    // --- Command Database ---
-    // Easily extensible: Add new keys for ecosystems and arrays of commands.
-    // Use lowercase for easier matching.
-    const commandDatabase = {
-        'Windows CMD': ['dir', 'cd', 'cls', 'echo', 'mkdir', 'rmdir', 'copy', 'move', 'del', 'type', 'ren', 'ipconfig', 'ping', 'netstat', 'tasklist', 'taskkill'],
-        'Linux': ['ls', 'cd', 'clear', 'pwd', 'mkdir', 'rmdir', 'cp', 'mv', 'rm', 'cat', 'touch', 'chmod', 'chown', 'ifconfig', 'ping', 'netstat', 'ps', 'kill', 'grep', 'find', 'man'],
-        'Git': ['git init', 'git clone', 'git status', 'git add', 'git commit', 'git push', 'git pull', 'git branch', 'git checkout', 'git merge', 'git log', 'git diff', 'git remote', 'git fetch', 'git tag'],
-        'Docker': ['docker run', 'docker ps', 'docker images', 'docker build', 'docker pull', 'docker push', 'docker stop', 'docker rm', 'docker rmi', 'docker network', 'docker volume', 'docker-compose up', 'docker-compose down', 'docker logs', 'docker exec'],
-        'Kubernetes': ['kubectl get pods', 'kubectl get services', 'kubectl get deployments', 'kubectl apply -f', 'kubectl delete', 'kubectl describe', 'kubectl logs', 'kubectl exec', 'kubectl config view', 'kubectl cluster-info', 'kubectl top node', 'kubectl top pod', 'kubectl rollout status', 'kubectl scale', 'helm install', 'helm list'],
-        // Add new ecosystems here, e.g.:
-        // 'PowerShell': ['Get-ChildItem', 'Set-Location', 'Clear-Host', 'Write-Host', 'New-Item', 'Remove-Item', ...]
-    };
+  // --- Game State ---
+  // commandDatabase is now loaded from commands.js
+  let score = 0;
+  let timeLeft = GAME_DURATION_SECONDS;
+  let timerInterval = null;
+  let leaderboard = [];
+  let gameStats = { totalGamesPlayed: 0 };
+  let konamiIndex = 0;
+  let isDemoMode = false;
+  let demoModeInterval = null;
 
-    // --- Game State ---
-    let score = 0;
-    let timeLeft = GAME_DURATION_SECONDS;
-    let timerInterval = null;
-    let leaderboard = [];
+  // --- Functions ---
 
-    // --- Functions ---
-
-    // Function to switch active screen AND set initial focus (Keyboard Enhanced)
-    function showScreen(screenToShow) {
-        screens.forEach(screen => screen.classList.remove('active'));
-        screenToShow.classList.add('active');
-
-        // Find the first focusable element (button or input) in the new screen
-        // Prioritize specific elements if needed (e.g., command input in game)
-        let firstFocusableElement;
-        if (screenToShow.id === 'game-screen') {
-            firstFocusableElement = commandInput;
-        } else if (screenToShow.id === 'game-over-screen') {
-             firstFocusableElement = playerNameInput; // Focus name input first
-        } else {
-            // Find the first button or text input that is visible
-            firstFocusableElement = screenToShow.querySelector('button, input[type="text"]');
-        }
-
-        // Use setTimeout to ensure the element is visible and focusable
-        if (firstFocusableElement) {
-            setTimeout(() => {
-                try { // Add try-catch for robustness if element becomes hidden quickly
-                     firstFocusableElement.focus();
-                } catch (e) {
-                    console.warn("Could not focus element:", firstFocusableElement, e);
-                }
-            }, 0); // Delay slightly to allow rendering
-        }
+  function showScreen(screenToShow) {
+    screens.forEach((screen) => screen.classList.remove('active'));
+    screenToShow.classList.add('active');
+    let firstFocusableElement;
+    if (screenToShow.id === 'game-screen') {
+      firstFocusableElement = commandInput;
+    } else if (screenToShow.id === 'game-over-screen') {
+      firstFocusableElement = playerNameInput;
+    } else {
+      firstFocusableElement = screenToShow.querySelector('button, input[type="text"]');
     }
-
-    // Load leaderboard from localStorage
-    function loadLeaderboard() {
+    if (firstFocusableElement) {
+      setTimeout(() => {
         try {
-            const storedLeaderboard = localStorage.getItem(LEADERBOARD_KEY);
-            if (storedLeaderboard) {
-                leaderboard = JSON.parse(storedLeaderboard);
-            } else {
-                leaderboard = [];
-            }
+          firstFocusableElement.focus();
         } catch (e) {
-            console.error("Could not load leaderboard from localStorage:", e);
-            leaderboard = []; // Reset leaderboard if storage fails
+          console.warn('Could not focus element:', firstFocusableElement, e);
         }
+      }, 0);
     }
+  }
 
-    // Save leaderboard to localStorage
-    function saveLeaderboard() {
-         try {
-            leaderboard.sort((a, b) => b.score - a.score); // Sort before saving
-             localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(leaderboard));
-         } catch (e) {
-            console.error("Could not save leaderboard to localStorage:", e);
-         }
+  function updateEcosystemList() {
+    const ecosystems = Object.keys(commandDatabase);
+    let listString = '';
+    if (ecosystems.length > 1) {
+        listString = ecosystems.slice(0, -1).join(', ') + ', and ' + ecosystems.slice(-1);
+    } else if (ecosystems.length === 1) {
+        listString = ecosystems[0];
     }
+    ecosystemList.textContent = listString;
+  }
 
-    // Display the leaderboard
-    function displayLeaderboard() {
-        // Ensure leaderboard data is sorted (might have been loaded without sorting)
-        leaderboard.sort((a, b) => b.score - a.score);
-        leaderboardList.innerHTML = ''; // Clear previous list
-
-        if (leaderboard.length === 0) {
-             leaderboardList.innerHTML = '<li>No scores yet!</li>';
-        } else {
-            leaderboard.slice(0, 10).forEach((entry, index) => { // Show top 10
-                const li = document.createElement('li');
-                // Pad score for alignment if desired, e.g., entry.score.toString().padStart(4, ' ')
-                li.textContent = `${(index + 1).toString().padEnd(2, ' ')}. ${entry.name.padEnd(10, ' ')} - ${entry.score}`;
-                leaderboardList.appendChild(li);
-            });
-        }
-        showScreen(leaderboardScreen);
+  function loadGameData() {
+    try {
+      const storedLeaderboard = localStorage.getItem(LEADERBOARD_KEY);
+      const storedStats = localStorage.getItem(STATS_KEY);
+      leaderboard = storedLeaderboard ? JSON.parse(storedLeaderboard) : [];
+      gameStats = storedStats ? JSON.parse(storedStats) : { totalGamesPlayed: 0 };
+    } catch (e) {
+      console.error('Could not load game data from localStorage:', e);
+      leaderboard = [];
+      gameStats = { totalGamesPlayed: 0 };
     }
+  }
 
-    // Show the main menu
-    function showMenu() {
-        // Clear potential leftover game state visually if needed
-        if (timerInterval) {
-             clearInterval(timerInterval);
-             timerInterval = null;
-        }
-        commandInput.disabled = false; // Ensure input is enabled if returning from game over early
-        showScreen(menuScreen);
+  function saveGameData() {
+    if (isDemoMode) return; // Do not save any data in demo mode
+    try {
+      leaderboard.sort((a, b) => b.score - a.score);
+      localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(leaderboard));
+      localStorage.setItem(STATS_KEY, JSON.stringify(gameStats));
+    } catch (e) {
+      console.error('Could not save game data to localStorage:', e);
     }
+  }
 
-     // Show instructions and ready prompt
-     function promptNewGame() {
-        showScreen(instructionsScreen);
+  function displayLeaderboard() {
+    leaderboard.sort((a, b) => b.score - a.score);
+    leaderboardList.innerHTML = '';
+    gamesPlayedCount.textContent = gameStats.totalGamesPlayed || 0;
+
+    if (leaderboard.length === 0) {
+      leaderboardList.innerHTML = '<li>No scores yet!</li>';
+    } else {
+      leaderboard.slice(0, 10).forEach((entry, index) => {
+        const li = document.createElement('li');
+        li.textContent = `${(index + 1).toString().padEnd(2, ' ')}. ${entry.name.padEnd(10, ' ')} - ${entry.score}`;
+        leaderboardList.appendChild(li);
+      });
     }
+    showScreen(leaderboardScreen);
+  }
 
-    // Start the game timer
-    function startTimer() {
-        timeLeft = GAME_DURATION_SECONDS;
-        timeLeftDisplay.textContent = timeLeft;
-        // Clear any existing interval just in case
-        if(timerInterval) clearInterval(timerInterval);
-        timerInterval = setInterval(() => {
-            timeLeft--;
-            timeLeftDisplay.textContent = timeLeft;
-            if (timeLeft <= 0) {
-                endGame();
+  function showMenu() {
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
+    commandInput.disabled = false;
+    showScreen(menuScreen);
+  }
+
+  function promptNewGame() {
+    showScreen(instructionsScreen);
+  }
+
+  function startTimer() {
+    timeLeft = GAME_DURATION_SECONDS;
+    timeLeftDisplay.textContent = timeLeft;
+    if (timerInterval) clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+      timeLeft--;
+      timeLeftDisplay.textContent = timeLeft;
+      if (timeLeft <= 0) {
+        endGame();
+      }
+    }, 1000);
+  }
+
+  function endGame() {
+    clearInterval(timerInterval);
+    timerInterval = null;
+
+    if (isDemoMode) {
+        resetGame(true); // Keep demo mode active
+        startTimer();
+        const allCommands = Object.values(commandDatabase).flat();
+        demoModeInterval = setInterval(() => {
+            if (timeLeft > 0) {
+                const randomCommand = allCommands[Math.floor(Math.random() * allCommands.length)];
+                processCommand(randomCommand);
             }
-        }, 1000);
+        }, 1500);
+        return;
     }
 
-    // End the game
-    function endGame() {
+    if (demoModeInterval) {
+      clearInterval(demoModeInterval);
+      demoModeInterval = null;
+    }
+    commandInput.disabled = true;
+
+    finalScoreSplash.textContent = score;
+    showScreen(gameOverSplashScreen);
+
+    setTimeout(() => {
+        finalScoreDisplay.textContent = score;
+        playerNameInput.value = '';
+        document.getElementById('game-over-screen').querySelector('h2').textContent = '-- Game Over --';
+        submitScoreBtn.disabled = false;
+        showScreen(gameOverScreen);
+    }, 5000);
+  }
+
+  function resetGame(keepDemoMode = false) {
+    score = 0;
+    timeLeft = GAME_DURATION_SECONDS;
+    currentScoreDisplay.textContent = score;
+    timeLeftDisplay.textContent = timeLeft;
+    outputArea.innerHTML = '';
+    commandInput.value = '';
+    commandInput.disabled = false;
+    konamiIndex = 0;
+    if (!keepDemoMode) {
+        isDemoMode = false;
+        demoModeIndicator.style.display = 'none';
+        if (demoModeInterval) {
+          clearInterval(demoModeInterval);
+          demoModeInterval = null;
+        }
+    }
+  }
+
+  function startGame() {
+    resetGame(isDemoMode);
+    if (!isDemoMode) {
+        gameStats.totalGamesPlayed++;
+        saveGameData();
+    }
+    showScreen(gameScreen);
+    startTimer();
+  }
+
+  function activateDemoMode() {
+    isDemoMode = true;
+    demoModeIndicator.style.display = 'block';
+    commandInput.disabled = true;
+    startGame();
+    const allCommands = Object.values(commandDatabase).flat();
+    demoModeInterval = setInterval(() => {
+        if (timeLeft > 0) {
+            const randomCommand = allCommands[Math.floor(Math.random() * allCommands.length)];
+            processCommand(randomCommand);
+        }
+    }, 1500);
+  }
+  
+  function exitDemoMode() {
+    isDemoMode = false;
+    demoModeIndicator.style.display = 'none';
+    if (timerInterval) {
         clearInterval(timerInterval);
         timerInterval = null;
-        commandInput.disabled = true;
-        finalScoreDisplay.textContent = score;
-        playerNameInput.value = ''; // Clear previous name
-        showScreen(gameOverScreen);
-        // Focus handled by showScreen now
     }
-
-    // Reset game state for a new game
-    function resetGame() {
-        score = 0;
-        timeLeft = GAME_DURATION_SECONDS;
-        currentScoreDisplay.textContent = score;
-        timeLeftDisplay.textContent = timeLeft;
-        outputArea.innerHTML = ''; // Clear output
-        commandInput.value = '';
-        commandInput.disabled = false;
+    if (demoModeInterval) {
+        clearInterval(demoModeInterval);
+        demoModeInterval = null;
     }
+    resetGame(); // Full reset
+    showMenu();
+  }
 
-    // Start a new game
-    function startGame() {
-        resetGame();
-        showScreen(gameScreen); // This will now handle focus
-        startTimer();
-    }
+  function processCommand(commandText) {
+    const trimmedCommand = commandText.trim().toLowerCase();
+    if (trimmedCommand === '') return;
 
-     // Process the entered command
-    function processCommand(commandText) {
-        const trimmedCommand = commandText.trim().toLowerCase();
-        if (trimmedCommand === '') return; // Ignore empty input
+    let commandFound = false;
+    const foundInEcosystems = [];
 
-        let commandFound = false;
-        const foundInEcosystems = [];
-
-        // Check against the database
-        for (const ecosystem in commandDatabase) {
-            // Check if the entered command *starts with* any known command base
-            // This allows commands like 'git commit -m "message"' to match 'git commit'
-            if (commandDatabase[ecosystem].some(cmd => trimmedCommand.startsWith(cmd) && cmd.length > 0)) {
-                 commandFound = true;
-                 // Avoid adding duplicates if multiple commands match (e.g., 'ls' and 'ls -l' if both were listed)
-                 if (!foundInEcosystems.includes(ecosystem)){
-                     foundInEcosystems.push(ecosystem);
-                 }
-            }
+    for (const ecosystem in commandDatabase) {
+      if (commandDatabase[ecosystem].some((cmd) => trimmedCommand.startsWith(cmd) && cmd.length > 0)) {
+        commandFound = true;
+        if (!foundInEcosystems.includes(ecosystem)) {
+          foundInEcosystems.push(ecosystem);
         }
+      }
+    }
 
-        // Display result in output area
-        const entryDiv = document.createElement('div');
-        entryDiv.classList.add('command-entry');
+    const entryDiv = document.createElement('div');
+    entryDiv.classList.add('command-entry');
+    const commandSpan = document.createElement('span');
+    commandSpan.textContent = `> ${commandText}`;
+    entryDiv.appendChild(commandSpan);
 
-        const commandSpan = document.createElement('span');
-        commandSpan.textContent = `> ${commandText}`; // Show original case
-        entryDiv.appendChild(commandSpan);
+    if (commandFound) {
+      score++;
+      currentScoreDisplay.textContent = score;
+      foundInEcosystems.forEach((eco) => {
+        const ecoSpan = document.createElement('span');
+        ecoSpan.classList.add('ecosystem-check');
+        ecoSpan.textContent = `[${eco}] ✓`;
+        entryDiv.appendChild(ecoSpan);
+      });
+    } else {
+      const errorSpan = document.createElement('span');
+      errorSpan.textContent = `[Command not recognized]`;
+      errorSpan.style.color = '#ff6b6b';
+      entryDiv.appendChild(errorSpan);
+    }
 
-        if (commandFound) {
-            score++; // Award point
-            currentScoreDisplay.textContent = score;
-            foundInEcosystems.forEach(eco => {
-                const ecoSpan = document.createElement('span');
-                ecoSpan.classList.add('ecosystem-check');
-                ecoSpan.textContent = `[${eco}] ✓`; // Indicate match
-                entryDiv.appendChild(ecoSpan);
-            });
+    outputArea.appendChild(entryDiv);
+    if (outputArea.scrollHeight - outputArea.scrollTop <= outputArea.clientHeight + 50) {
+      outputArea.scrollTop = outputArea.scrollHeight;
+    }
+  }
+
+  function handleCommandInputSubmit(event) {
+    if (event.key === 'Enter' && !commandInput.disabled) {
+      event.preventDefault();
+      processCommand(commandInput.value);
+      commandInput.value = '';
+    }
+  }
+
+  function submitScore() {
+    if (isDemoMode) return;
+    const playerName = playerNameInput.value.trim().slice(0, 10) || 'Anonymous';
+    leaderboard.push({ name: playerName, score: score });
+    saveGameData();
+    displayLeaderboard();
+  }
+
+  function downloadData() {
+    const dataToDownload = {
+      leaderboard: leaderboard,
+      stats: gameStats,
+    };
+    const dataStr = JSON.stringify(dataToDownload, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = 'command_prompt_heroes_data.json';
+    document.body.appendChild(anchor);
+    anchor.click();
+    document.body.removeChild(anchor);
+    URL.revokeObjectURL(url);
+  }
+
+  function resetData() {
+    if (confirm('Are you sure you want to reset all scores and stats? This cannot be undone.')) {
+      leaderboard = [];
+      gameStats = { totalGamesPlayed: 0 };
+      saveGameData();
+      displayLeaderboard();
+      console.log('All game data has been reset.');
+    }
+  }
+
+  // --- Event Listeners ---
+  newGameBtn.addEventListener('click', promptNewGame);
+  leaderboardBtn.addEventListener('click', () => {
+    loadGameData();
+    displayLeaderboard();
+  });
+  readyYesBtn.addEventListener('click', startGame);
+  readyNoBtn.addEventListener('click', showMenu);
+  submitScoreBtn.addEventListener('click', submitScore);
+  backToMenuBtn.addEventListener('click', showMenu);
+  menuFromLeaderboardBtn.addEventListener('click', showMenu);
+  downloadDataBtn.addEventListener('click', downloadData);
+  resetDataBtn.addEventListener('click', resetData);
+
+  commandInput.addEventListener('keydown', handleCommandInputSubmit);
+
+  document.addEventListener('keydown', (event) => {
+    const activeScreen = document.querySelector('.game-screen.active');
+    if (!activeScreen) return;
+
+    if (event.key === 'Escape') {
+        event.preventDefault();
+        if (isDemoMode) {
+            exitDemoMode();
+            return;
+        }
+        if (activeScreen.id === 'leaderboard-screen' && menuFromLeaderboardBtn) {
+            menuFromLeaderboardBtn.click();
+        } else if (activeScreen.id === 'instructions-screen' && readyNoBtn) {
+            readyNoBtn.click();
+        } else if (activeScreen.id === 'game-over-screen' && backToMenuBtn) {
+            backToMenuBtn.click();
+        }
+    }
+
+    if (activeScreen.id === 'game-screen' && !isDemoMode) {
+        if (event.key === konamiCode[konamiIndex]) {
+            konamiIndex++;
+            if (konamiIndex === konamiCode.length) {
+                activateDemoMode();
+                konamiIndex = 0;
+            }
         } else {
-            const errorSpan = document.createElement('span');
-            errorSpan.textContent = `[Command not recognized]`;
-            errorSpan.style.color = '#ff6b6b'; // Reddish color for error
-            entryDiv.appendChild(errorSpan);
-        }
-
-        outputArea.appendChild(entryDiv);
-        // Auto-scroll to bottom only if the user isn't scrolled up
-        if (outputArea.scrollHeight - outputArea.scrollTop <= outputArea.clientHeight + 50) { // Tolerance
-             outputArea.scrollTop = outputArea.scrollHeight;
+            konamiIndex = 0;
         }
     }
 
-    // Handle command input submission (Specific listener for this input)
-    function handleCommandInputSubmit(event) {
-        if (event.key === 'Enter' && !commandInput.disabled) {
-             event.preventDefault(); // Prevent any default action
-            processCommand(commandInput.value);
-            commandInput.value = ''; // Clear input field
+    const focusedElement = document.activeElement;
+
+    if (event.key === 'Enter') {
+      if (focusedElement && focusedElement.tagName === 'BUTTON' && activeScreen.contains(focusedElement)) {
+        event.preventDefault();
+        focusedElement.click();
+      } else if (focusedElement === playerNameInput && activeScreen.id === 'game-over-screen') {
+        event.preventDefault();
+        submitScoreBtn.click();
+      }
+    } else if (event.key === 'Tab') {
+      if (activeScreen.contains(focusedElement)) {
+        const focusableElements = Array.from(activeScreen.querySelectorAll('button, input[type="text"]')).filter((el) => el.offsetParent !== null && !el.disabled);
+
+        if (focusableElements.length > 1) {
+          const currentIndex = focusableElements.indexOf(focusedElement);
+          let nextIndex;
+          if (event.shiftKey) {
+            nextIndex = currentIndex <= 0 ? focusableElements.length - 1 : currentIndex - 1;
+          } else {
+            nextIndex = currentIndex >= focusableElements.length - 1 ? 0 : currentIndex + 1;
+          }
+          event.preventDefault();
+          focusableElements[nextIndex].focus();
+        } else if (focusableElements.length === 1) {
+          event.preventDefault();
         }
+      }
     }
+  });
 
-    // Save score to leaderboard
-    function submitScore() {
-        const playerName = playerNameInput.value.trim().slice(0, 10) || 'Anonymous'; // Max 10 chars
-
-        leaderboard.push({ name: playerName, score: score });
-        saveLeaderboard(); // Saves and sorts
-        displayLeaderboard(); // Displays sorted list
+  // --- Initialization ---
+  function init() {
+    showScreen(titleScreen);
+    if (typeof commandDatabase === 'undefined' || Object.keys(commandDatabase).length === 0) {
+        console.error("Command database not loaded. Make sure commands.js is included correctly.");
+        outputArea.innerHTML = '<div style="color: #ff6b6b;">Error: Could not load command definitions.</div>';
+        newGameBtn.disabled = true;
+        return;
     }
+    updateEcosystemList();
+    loadGameData();
+    setTimeout(() => {
+      showMenu();
+    }, 2500);
+  }
 
-    // --- Event Listeners ---
-
-    // Button Clicks (still needed for mouse users and direct calls)
-    newGameBtn.addEventListener('click', promptNewGame);
-    leaderboardBtn.addEventListener('click', () => {
-        loadLeaderboard(); // Ensure it's up-to-date
-        displayLeaderboard();
-    });
-    readyYesBtn.addEventListener('click', startGame);
-    readyNoBtn.addEventListener('click', showMenu);
-    submitScoreBtn.addEventListener('click', submitScore);
-    backToMenuBtn.addEventListener('click', showMenu); // From Game Over
-    menuFromLeaderboardBtn.addEventListener('click', showMenu); // From Leaderboard
-
-    // Specific listener for the command input field's Enter key
-    commandInput.addEventListener('keydown', handleCommandInputSubmit);
-
-
-    // --- Global Keyboard Listener for Navigation & Actions ---
-    document.addEventListener('keydown', (event) => {
-        const activeScreen = document.querySelector('.game-screen.active');
-        if (!activeScreen) return; // Exit if no screen is active
-
-        // Special handling ONLY if the event target is NOT the command input or player name input
-        // These inputs have their own Enter key logic or specific handling below.
-        const isTypingInput = event.target === commandInput || event.target === playerNameInput;
-
-        const focusedElement = document.activeElement;
-
-        // --- Enter Key Logic ---
-        if (event.key === 'Enter') {
-            // If a button is focused within the active screen, click it
-            if (focusedElement && focusedElement.tagName === 'BUTTON' && activeScreen.contains(focusedElement)) {
-                event.preventDefault(); // Prevent default button behavior
-                focusedElement.click(); // Simulate click
-            }
-            // If the player name input is focused on Game Over screen, click Submit
-            else if (focusedElement === playerNameInput && activeScreen.id === 'game-over-screen') {
-                 event.preventDefault();
-                 submitScoreBtn.click();
-            }
-            // Note: Command input Enter is handled by its own 'keydown' listener
-        }
-
-        // --- Escape Key Logic ---
-        // Always allow Escape regardless of focus, unless typing command
-        else if (event.key === 'Escape' && event.target !== commandInput) {
-            event.preventDefault(); // Prevent potential browser default actions for Escape
-            // Go back to menu from Leaderboard, Instructions, or Game Over
-            if (activeScreen.id === 'leaderboard-screen' && menuFromLeaderboardBtn) {
-                 menuFromLeaderboardBtn.click();
-            } else if (activeScreen.id === 'instructions-screen' && readyNoBtn) {
-                 readyNoBtn.click(); // This button goes back to the menu
-            } else if (activeScreen.id === 'game-over-screen' && backToMenuBtn) {
-                 backToMenuBtn.click();
-            }
-        }
-
-        // --- Tab Key Logic (Focus Cycling) ---
-        // Allow default Tab behavior unless specific trapping/wrapping is needed.
-        // The commented-out code below is an example of manual focus trapping.
-        
-        else if (event.key === 'Tab') {
-            // Only manage tab if focus is currently within the active screen
-            if (activeScreen.contains(focusedElement)) {
-                const focusableElements = Array.from(activeScreen.querySelectorAll('button, input[type="text"]'))
-                                            .filter(el => el.offsetParent !== null && !el.disabled); // Get visible, enabled focusable elements
-
-                if (focusableElements.length > 1) { // Only trap if more than one element
-                    const currentIndex = focusableElements.indexOf(focusedElement);
-
-                    let nextIndex;
-                    if (event.shiftKey) { // Shift + Tab (Backwards)
-                        nextIndex = (currentIndex <= 0) ? focusableElements.length - 1 : currentIndex - 1;
-                    } else { // Tab (Forwards)
-                        nextIndex = (currentIndex >= focusableElements.length - 1) ? 0 : currentIndex + 1;
-                    }
-
-                    event.preventDefault(); // Prevent default tab behavior
-                    focusableElements[nextIndex].focus();
-                } else if (focusableElements.length === 1) {
-                     event.preventDefault(); // Prevent tabbing away if only one element
-                }
-            }
-        }
-        
-    });
-
-
-    // --- Initialization ---
-    function init() {
-        // Show title briefly, then menu
-        showScreen(titleScreen);
-        loadLeaderboard(); // Load existing scores on startup
-        setTimeout(() => {
-            showMenu(); // showScreen within showMenu handles initial focus
-        }, 2500); // Show title for 2.5 seconds
-    }
-
-    init(); // Start the game setup
+  init();
 });
