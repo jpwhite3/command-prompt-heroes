@@ -5,7 +5,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const menuScreen = document.getElementById('menu-screen');
   const instructionsScreen = document.getElementById('instructions-screen');
   const gameScreen = document.getElementById('game-screen');
-  const gameOverSplashScreen = document.getElementById('game-over-splash-screen');
+  const gameOverSplashScreen = document.getElementById(
+    'game-over-splash-screen'
+  );
   const finalScoreSplash = document.getElementById('final-score-splash');
   const gameOverScreen = document.getElementById('game-over-screen');
   const leaderboardScreen = document.getElementById('leaderboard-screen');
@@ -14,11 +16,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const newGameBtn = document.getElementById('new-game-btn');
   const leaderboardBtn = document.getElementById('leaderboard-btn');
+  const demoModeBtn = document.getElementById('demo-mode-btn');
   const readyYesBtn = document.getElementById('ready-yes-btn');
   const readyNoBtn = document.getElementById('ready-no-btn');
   const submitScoreBtn = document.getElementById('submit-score-btn');
   const backToMenuBtn = document.getElementById('back-to-menu-btn');
-  const menuFromLeaderboardBtn = document.getElementById('menu-from-leaderboard-btn');
+  const menuFromLeaderboardBtn = document.getElementById(
+    'menu-from-leaderboard-btn'
+  );
   const downloadDataBtn = document.getElementById('download-data-btn');
   const resetDataBtn = document.getElementById('reset-data-btn');
 
@@ -35,7 +40,18 @@ document.addEventListener('DOMContentLoaded', () => {
   const GAME_DURATION_SECONDS = 60;
   const LEADERBOARD_KEY = 'commandLineHeroLeaderboard';
   const STATS_KEY = 'commandLineHeroStats';
-  const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+  const konamiCode = [
+    'ArrowUp',
+    'ArrowUp',
+    'ArrowDown',
+    'ArrowDown',
+    'ArrowLeft',
+    'ArrowRight',
+    'ArrowLeft',
+    'ArrowRight',
+    'b',
+    'a',
+  ];
 
   // --- Game State ---
   let score = 0;
@@ -59,7 +75,9 @@ document.addEventListener('DOMContentLoaded', () => {
     } else if (screenToShow.id === 'game-over-screen') {
       firstFocusableElement = playerNameInput;
     } else {
-      firstFocusableElement = screenToShow.querySelector('button, input[type="text"]');
+      firstFocusableElement = screenToShow.querySelector(
+        'button, input[type="text"]'
+      );
     }
     if (firstFocusableElement) {
       setTimeout(() => {
@@ -76,9 +94,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const ecosystems = Object.keys(commandDatabase);
     let listString = '';
     if (ecosystems.length > 1) {
-        listString = ecosystems.slice(0, -1).join(', ') + ', and ' + ecosystems.slice(-1);
+      listString =
+        ecosystems.slice(0, -1).join(', ') + ', and ' + ecosystems.slice(-1);
     } else if (ecosystems.length === 1) {
-        listString = ecosystems[0];
+      listString = ecosystems[0];
     }
     ecosystemList.textContent = listString;
   }
@@ -88,7 +107,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const storedLeaderboard = localStorage.getItem(LEADERBOARD_KEY);
       const storedStats = localStorage.getItem(STATS_KEY);
       leaderboard = storedLeaderboard ? JSON.parse(storedLeaderboard) : [];
-      gameStats = storedStats ? JSON.parse(storedStats) : { totalGamesPlayed: 0 };
+      gameStats = storedStats
+        ? JSON.parse(storedStats)
+        : { totalGamesPlayed: 0 };
     } catch (e) {
       console.error('Could not load game data from localStorage:', e);
       leaderboard = [];
@@ -117,7 +138,9 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       leaderboard.slice(0, 10).forEach((entry, index) => {
         const li = document.createElement('li');
-        li.textContent = `${(index + 1).toString().padEnd(2, ' ')}. ${entry.name.padEnd(10, ' ')} - ${entry.score}`;
+        li.textContent = `${(index + 1)
+          .toString()
+          .padEnd(2, ' ')}. ${entry.name.padEnd(10, ' ')} - ${entry.score}`;
         leaderboardList.appendChild(li);
       });
     }
@@ -154,21 +177,22 @@ document.addEventListener('DOMContentLoaded', () => {
     clearInterval(timerInterval);
     timerInterval = null;
     if (typingInterval) {
-        clearInterval(typingInterval);
-        typingInterval = null;
+      clearInterval(typingInterval);
+      typingInterval = null;
     }
 
     if (isDemoMode) {
-        resetGame(true);
-        startTimer();
-        const allCommands = Object.values(commandDatabase).flat();
-        demoModeInterval = setInterval(() => {
-            if (timeLeft > 0) {
-                const randomCommand = allCommands[Math.floor(Math.random() * allCommands.length)];
-                simulateTyping(randomCommand);
-            }
-        }, 2500); // Start typing a new command every 2.5 seconds
-        return;
+      resetGame(true);
+      startTimer();
+      const allCommands = Object.values(commandDatabase).flat();
+      demoModeInterval = setInterval(() => {
+        if (timeLeft > 0) {
+          const randomCommand =
+            allCommands[Math.floor(Math.random() * allCommands.length)];
+          simulateTyping(randomCommand);
+        }
+      }, 2500); // Start typing a new command every 2.5 seconds
+      return;
     }
 
     if (demoModeInterval) {
@@ -181,11 +205,13 @@ document.addEventListener('DOMContentLoaded', () => {
     showScreen(gameOverSplashScreen);
 
     setTimeout(() => {
-        finalScoreDisplay.textContent = score;
-        playerNameInput.value = '';
-        document.getElementById('game-over-screen').querySelector('h2').textContent = '-- Game Over --';
-        submitScoreBtn.disabled = false;
-        showScreen(gameOverScreen);
+      finalScoreDisplay.textContent = score;
+      playerNameInput.value = '';
+      document
+        .getElementById('game-over-screen')
+        .querySelector('h2').textContent = '-- Game Over --';
+      submitScoreBtn.disabled = false;
+      showScreen(gameOverScreen);
     }, 5000);
   }
 
@@ -199,24 +225,24 @@ document.addEventListener('DOMContentLoaded', () => {
     commandInput.disabled = false;
     konamiIndex = 0;
     if (typingInterval) {
-        clearInterval(typingInterval);
-        typingInterval = null;
+      clearInterval(typingInterval);
+      typingInterval = null;
     }
     if (!keepDemoMode) {
-        isDemoMode = false;
-        demoModeIndicator.style.display = 'none';
-        if (demoModeInterval) {
-          clearInterval(demoModeInterval);
-          demoModeInterval = null;
-        }
+      isDemoMode = false;
+      demoModeIndicator.style.display = 'none';
+      if (demoModeInterval) {
+        clearInterval(demoModeInterval);
+        demoModeInterval = null;
+      }
     }
   }
 
   function startGame() {
     resetGame(isDemoMode);
     if (!isDemoMode) {
-        gameStats.totalGamesPlayed++;
-        saveGameData();
+      gameStats.totalGamesPlayed++;
+      saveGameData();
     }
     showScreen(gameScreen);
     startTimer();
@@ -226,18 +252,18 @@ document.addEventListener('DOMContentLoaded', () => {
     let i = 0;
     commandInput.value = '';
     if (typingInterval) {
-        clearInterval(typingInterval);
+      clearInterval(typingInterval);
     }
     typingInterval = setInterval(() => {
-        if (i < command.length) {
-            commandInput.value += command.charAt(i);
-            i++;
-        } else {
-            clearInterval(typingInterval);
-            typingInterval = null;
-            processCommand(command);
-            commandInput.value = '';
-        }
+      if (i < command.length) {
+        commandInput.value += command.charAt(i);
+        i++;
+      } else {
+        clearInterval(typingInterval);
+        typingInterval = null;
+        processCommand(command);
+        commandInput.value = '';
+      }
     }, 100); // Typing speed
   }
 
@@ -248,27 +274,28 @@ document.addEventListener('DOMContentLoaded', () => {
     startGame();
     const allCommands = Object.values(commandDatabase).flat();
     demoModeInterval = setInterval(() => {
-        if (timeLeft > 0) {
-            const randomCommand = allCommands[Math.floor(Math.random() * allCommands.length)];
-            simulateTyping(randomCommand);
-        }
+      if (timeLeft > 0) {
+        const randomCommand =
+          allCommands[Math.floor(Math.random() * allCommands.length)];
+        simulateTyping(randomCommand);
+      }
     }, 2500);
   }
-  
+
   function exitDemoMode() {
     isDemoMode = false;
     demoModeIndicator.style.display = 'none';
     if (timerInterval) {
-        clearInterval(timerInterval);
-        timerInterval = null;
+      clearInterval(timerInterval);
+      timerInterval = null;
     }
     if (demoModeInterval) {
-        clearInterval(demoModeInterval);
-        demoModeInterval = null;
+      clearInterval(demoModeInterval);
+      demoModeInterval = null;
     }
     if (typingInterval) {
-        clearInterval(typingInterval);
-        typingInterval = null;
+      clearInterval(typingInterval);
+      typingInterval = null;
     }
     resetGame();
     showMenu();
@@ -282,7 +309,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const foundInEcosystems = [];
 
     for (const ecosystem in commandDatabase) {
-      if (commandDatabase[ecosystem].some((cmd) => trimmedCommand.startsWith(cmd) && cmd.length > 0)) {
+      if (
+        commandDatabase[ecosystem].some(
+          (cmd) => trimmedCommand.startsWith(cmd) && cmd.length > 0
+        )
+      ) {
         commandFound = true;
         if (!foundInEcosystems.includes(ecosystem)) {
           foundInEcosystems.push(ecosystem);
@@ -313,7 +344,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     outputArea.appendChild(entryDiv);
-    if (outputArea.scrollHeight - outputArea.scrollTop <= outputArea.clientHeight + 50) {
+    if (
+      outputArea.scrollHeight - outputArea.scrollTop <=
+      outputArea.clientHeight + 50
+    ) {
       outputArea.scrollTop = outputArea.scrollHeight;
     }
   }
@@ -352,7 +386,11 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function resetData() {
-    if (confirm('Are you sure you want to reset all scores and stats? This cannot be undone.')) {
+    if (
+      confirm(
+        'Are you sure you want to reset all scores and stats? This cannot be undone.'
+      )
+    ) {
       leaderboard = [];
       gameStats = { totalGamesPlayed: 0 };
       saveGameData();
@@ -385,53 +423,68 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!activeScreen) return;
 
     if (event.key === 'Escape') {
-        event.preventDefault();
-        if (isDemoMode) {
-            exitDemoMode();
-            return;
-        }
-        if (activeScreen.id === 'leaderboard-screen' && menuFromLeaderboardBtn) {
-            menuFromLeaderboardBtn.click();
-        } else if (activeScreen.id === 'instructions-screen' && readyNoBtn) {
-            readyNoBtn.click();
-        } else if (activeScreen.id === 'game-over-screen' && backToMenuBtn) {
-            backToMenuBtn.click();
-        }
+      event.preventDefault();
+      if (isDemoMode) {
+        exitDemoMode();
+        return;
+      }
+      if (activeScreen.id === 'leaderboard-screen' && menuFromLeaderboardBtn) {
+        menuFromLeaderboardBtn.click();
+      } else if (activeScreen.id === 'instructions-screen' && readyNoBtn) {
+        readyNoBtn.click();
+      } else if (activeScreen.id === 'game-over-screen' && backToMenuBtn) {
+        backToMenuBtn.click();
+      }
     }
 
     if (activeScreen.id === 'game-screen' && !isDemoMode) {
-        if (event.key === konamiCode[konamiIndex]) {
-            konamiIndex++;
-            if (konamiIndex === konamiCode.length) {
-                activateDemoMode();
-                konamiIndex = 0;
-            }
-        } else {
-            konamiIndex = 0;
+      if (event.key === konamiCode[konamiIndex]) {
+        konamiIndex++;
+        if (konamiIndex === konamiCode.length) {
+          activateDemoMode();
+          konamiIndex = 0;
         }
+      } else {
+        konamiIndex = 0;
+      }
     }
 
     const focusedElement = document.activeElement;
 
     if (event.key === 'Enter') {
-      if (focusedElement && focusedElement.tagName === 'BUTTON' && activeScreen.contains(focusedElement)) {
+      if (
+        focusedElement &&
+        focusedElement.tagName === 'BUTTON' &&
+        activeScreen.contains(focusedElement)
+      ) {
         event.preventDefault();
         focusedElement.click();
-      } else if (focusedElement === playerNameInput && activeScreen.id === 'game-over-screen') {
+      } else if (
+        focusedElement === playerNameInput &&
+        activeScreen.id === 'game-over-screen'
+      ) {
         event.preventDefault();
         submitScoreBtn.click();
       }
     } else if (event.key === 'Tab') {
       if (activeScreen.contains(focusedElement)) {
-        const focusableElements = Array.from(activeScreen.querySelectorAll('button, input[type="text"]')).filter((el) => el.offsetParent !== null && !el.disabled);
+        const focusableElements = Array.from(
+          activeScreen.querySelectorAll('button, input[type="text"]')
+        ).filter((el) => el.offsetParent !== null && !el.disabled);
 
         if (focusableElements.length > 1) {
           const currentIndex = focusableElements.indexOf(focusedElement);
           let nextIndex;
           if (event.shiftKey) {
-            nextIndex = currentIndex <= 0 ? focusableElements.length - 1 : currentIndex - 1;
+            nextIndex =
+              currentIndex <= 0
+                ? focusableElements.length - 1
+                : currentIndex - 1;
           } else {
-            nextIndex = currentIndex >= focusableElements.length - 1 ? 0 : currentIndex + 1;
+            nextIndex =
+              currentIndex >= focusableElements.length - 1
+                ? 0
+                : currentIndex + 1;
           }
           event.preventDefault();
           focusableElements[nextIndex].focus();
@@ -445,11 +498,17 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- Initialization ---
   function init() {
     showScreen(titleScreen);
-    if (typeof commandDatabase === 'undefined' || Object.keys(commandDatabase).length === 0) {
-        console.error("Command database not loaded. Make sure commands.js is included correctly.");
-        outputArea.innerHTML = '<div style="color: #ff6b6b;">Error: Could not load command definitions.</div>';
-        newGameBtn.disabled = true;
-        return;
+    if (
+      typeof commandDatabase === 'undefined' ||
+      Object.keys(commandDatabase).length === 0
+    ) {
+      console.error(
+        'Command database not loaded. Make sure commands.js is included correctly.'
+      );
+      outputArea.innerHTML =
+        '<div style="color: #ff6b6b;">Error: Could not load command definitions.</div>';
+      newGameBtn.disabled = true;
+      return;
     }
     updateEcosystemList();
     loadGameData();
