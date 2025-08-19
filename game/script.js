@@ -452,7 +452,15 @@ document.addEventListener('DOMContentLoaded', () => {
         exitDemoMode();
         return;
       }
-      if (activeScreen.id === 'leaderboard-screen' && menuFromLeaderboardBtn) {
+      if (activeScreen.id === 'game-screen') {
+        // Kill the current game and return to main menu
+        if (timerInterval) {
+          clearInterval(timerInterval);
+          timerInterval = null;
+        }
+        resetGame();
+        showMenu();
+      } else if (activeScreen.id === 'leaderboard-screen' && menuFromLeaderboardBtn) {
         menuFromLeaderboardBtn.click();
       } else if (activeScreen.id === 'instructions-screen' && readyNoBtn) {
         readyNoBtn.click();
