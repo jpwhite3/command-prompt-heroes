@@ -386,10 +386,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function submitScore() {
     if (isDemoMode) return;
-    const playerName = playerNameInput.value.trim().slice(0, 10) || 'Anonymous';
-    leaderboard.push({ name: playerName, score: score });
-    saveGameData();
-    displayLeaderboard();
+    const playerName = playerNameInput.value.trim().slice(0, 10);
+    if (playerName) {
+      leaderboard.push({ name: playerName, score: score });
+      saveGameData();
+      displayLeaderboard();
+    } else {
+      showMenu();
+    }
   }
 
   function downloadData() {
