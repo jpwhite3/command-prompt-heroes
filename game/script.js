@@ -35,6 +35,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const playerNameInput = document.getElementById('player-name');
   const leaderboardList = document.getElementById('leaderboard-list');
   const gamesPlayedCount = document.getElementById('games-played-count');
+  
+  // --- Stats Display Elements ---
+  const statAccuracy = document.getElementById('stat-accuracy');
+  const statCps = document.getElementById('stat-cps');
+  const statTotal = document.getElementById('stat-total');
+  const statCorrect = document.getElementById('stat-correct');
+  const statIncorrect = document.getElementById('stat-incorrect');
+  const statDuplicates = document.getElementById('stat-duplicates');
+  const statFastest = document.getElementById('stat-fastest');
 
   // --- Game Configuration ---
   const GAME_DURATION_SECONDS = 60;
@@ -64,6 +73,14 @@ document.addEventListener('DOMContentLoaded', () => {
   let demoModeInterval = null;
   let typingInterval = null;
   let usedCommands = new Set();
+  
+  // --- Gameplay Statistics ---
+  let gameStartTime = null;
+  let totalCommandsEntered = 0;
+  let correctCommands = 0;
+  let incorrectCommands = 0;
+  let duplicateCommands = 0;
+  let commandTimes = [];
 
   // --- Functions ---
 
@@ -174,6 +191,39 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 1000);
   }
 
+  function calculateAndDisplayStats() {
+    // Calculate accuracy
+    const accuracy = totalCommandsEntered > 0 ? 
+      Math.round((correctCommands / totalCommandsEntered) * 100) : 0;
+    
+    // Calculate commands per second
+    const gameEndTime = Date.now();
+    const gameDurationMs = gameEndTime - gameStartTime;
+    const gameDurationSeconds = gameDurationMs / 1000;
+    const cps = gameDurationSeconds > 0 ? 
+      (totalCommandsEntered / gameDurationSeconds).toFixed(1) : '0.0';
+    
+    // Calculate fastest command interval
+    let fastestCommand = '--';
+    if (commandTimes.length > 1) {
+      const intervals = [];
+      for (let i = 1; i < commandTimes.length; i++) {
+        intervals.push(commandTimes[i] - commandTimes[i - 1]);
+      }
+      const minInterval = Math.min(...intervals);
+      fastestCommand = `${(minInterval / 1000).toFixed(2)}s`;
+    }
+    
+    // Update display elements
+    statAccuracy.textContent = `${accuracy}%`;
+    statCps.textContent = cps;
+    statTotal.textContent = totalCommandsEntered;
+    statCorrect.textContent = correctCommands;
+    statIncorrect.textContent = incorrectCommands;
+    statDuplicates.textContent = duplicateCommands;
+    statFastest.textContent = fastestCommand;
+  }
+
   function endGame() {
     clearInterval(timerInterval);
     timerInterval = null;
@@ -207,6 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     setTimeout(() => {
       finalScoreDisplay.textContent = score;
+      calculateAndDisplayStats();
       playerNameInput.value = '';
       document
         .getElementById('game-over-screen')
@@ -226,6 +277,15 @@ document.addEventListener('DOMContentLoaded', () => {
     commandInput.disabled = false;
     konamiIndex = 0;
     usedCommands.clear();
+    
+    // Reset gameplay statistics
+    gameStartTime = null;
+    totalCommandsEntered = 0;
+    correctCommands = 0;
+    incorrectCommands = 0;
+    duplicateCommands = 0;
+    commandTimes = [];
+    
     if (typingInterval) {
       clearInterval(typingInterval);
       typingInterval = null;
@@ -246,6 +306,7 @@ document.addEventListener('DOMContentLoaded', () => {
       gameStats.totalGamesPlayed++;
       saveGameData();
     }
+    gameStartTime = Date.now();
     showScreen(gameScreen);
     startTimer();
   }
@@ -307,8 +368,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const trimmedCommand = commandText.trim().toLowerCase();
     if (trimmedCommand === '') return;
 
+    // Track timing for this command
+    const commandTime = Date.now();
+    commandTimes.push(commandTime);
+    totalCommandsEntered++;
+
     // Check for duplicate command
     if (usedCommands.has(trimmedCommand)) {
+      duplicateCommands++;
       const entryDiv = document.createElement('div');
       entryDiv.classList.add('command-entry');
       const commandSpan = document.createElement('span');
@@ -353,6 +420,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (commandFound) {
       usedCommands.add(trimmedCommand);
       score++;
+      correctCommands++;
       currentScoreDisplay.textContent = score;
       foundInEcosystems.forEach((eco) => {
         const ecoSpan = document.createElement('span');
@@ -361,6 +429,7 @@ document.addEventListener('DOMContentLoaded', () => {
         entryDiv.appendChild(ecoSpan);
       });
     } else {
+      incorrectCommands++;
       const errorSpan = document.createElement('span');
       errorSpan.textContent = `[Command not recognized]`;
       errorSpan.style.color = '#ff6b6b';

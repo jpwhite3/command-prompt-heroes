@@ -62,6 +62,33 @@
             <div id="game-over-screen" class="game-screen">
                 <h2>-- Game Over --</h2>
                 <p>Final Score: <span id="final-score">0</span></p>
+                <div id="game-stats">
+                    <h3>-- Player Statistics --</h3>
+                    <table id="stats-table">
+                        <tr>
+                            <td>Accuracy:</td>
+                            <td><span id="stat-accuracy">0%</span></td>
+                            <td>Commands/Sec:</td>
+                            <td><span id="stat-cps">0.0</span></td>
+                        </tr>
+                        <tr>
+                            <td>Total:</td>
+                            <td><span id="stat-total">0</span></td>
+                            <td>Correct:</td>
+                            <td><span id="stat-correct">0</span></td>
+                        </tr>
+                        <tr>
+                            <td>Incorrect:</td>
+                            <td><span id="stat-incorrect">0</span></td>
+                            <td>Duplicates:</td>
+                            <td><span id="stat-duplicates">0</span></td>
+                        </tr>
+                        <tr>
+                            <td>Fastest Command:</td>
+                            <td colspan="3"><span id="stat-fastest">--</span></td>
+                        </tr>
+                    </table>
+                </div>
                 <label for="player-name">Enter your name for the Leaderboard:</label>
                 <input type="text" id="player-name" maxlength="10">
                 <button id="submit-score-btn">Submit Score</button>

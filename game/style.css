@@ -286,3 +286,38 @@ input[type="text"]:focus {
     outline: none;
 }
 */
+
+/* --- Statistics Table Styling --- */
+#stats-table {
+    border-collapse: collapse;
+    width: 100%;
+    max-width: 500px;
+    margin: 10px auto;
+    font-family: 'VT323', monospace;
+    font-size: 18px;
+}
+
+#stats-table td {
+    padding: 5px 10px;
+    text-align: left;
+    border: 1px solid #00ff00;
+    vertical-align: middle;
+}
+
+#stats-table td:nth-child(even) {
+    text-align: right;
+    font-weight: bold;
+}
+
+#stats-table td:nth-child(1),
+#stats-table td:nth-child(3) {
+    background-color: rgba(0, 255, 0, 0.1);
+    color: #00cc00;
+}
+
+#game-stats h3 {
+    margin-bottom: 15px;
+    border-bottom: 1px solid #00ff00;
+    padding-bottom: 5px;
+    display: inline-block;
+}
