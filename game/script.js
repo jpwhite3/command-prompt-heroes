@@ -63,6 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let isDemoMode = false;
   let demoModeInterval = null;
   let typingInterval = null;
+  let usedCommands = new Set();
 
   // --- Functions ---
 
@@ -224,6 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
     commandInput.value = '';
     commandInput.disabled = false;
     konamiIndex = 0;
+    usedCommands.clear();
     if (typingInterval) {
       clearInterval(typingInterval);
       typingInterval = null;
@@ -305,13 +307,34 @@ document.addEventListener('DOMContentLoaded', () => {
     const trimmedCommand = commandText.trim().toLowerCase();
     if (trimmedCommand === '') return;
 
+    // Check for duplicate command
+    if (usedCommands.has(trimmedCommand)) {
+      const entryDiv = document.createElement('div');
+      entryDiv.classList.add('command-entry');
+      const commandSpan = document.createElement('span');
+      commandSpan.textContent = `> ${commandText}`;
+      entryDiv.appendChild(commandSpan);
+      const errorSpan = document.createElement('span');
+      errorSpan.textContent = `[Already entered]`;
+      errorSpan.style.color = '#ff6b6b';
+      entryDiv.appendChild(errorSpan);
+      outputArea.appendChild(entryDiv);
+      if (
+        outputArea.scrollHeight - outputArea.scrollTop <=
+        outputArea.clientHeight + 50
+      ) {
+        outputArea.scrollTop = outputArea.scrollHeight;
+      }
+      return;
+    }
+
     let commandFound = false;
     const foundInEcosystems = [];
 
     for (const ecosystem in commandDatabase) {
       if (
         commandDatabase[ecosystem].some(
-          (cmd) => trimmedCommand.startsWith(cmd) && cmd.length > 0
+          (cmd) => trimmedCommand === cmd && cmd.length > 0
         )
       ) {
         commandFound = true;
@@ -328,6 +351,7 @@ document.addEventListener('DOMContentLoaded', () => {
     entryDiv.appendChild(commandSpan);
 
     if (commandFound) {
+      usedCommands.add(trimmedCommand);
       score++;
       currentScoreDisplay.textContent = score;
       foundInEcosystems.forEach((eco) => {
