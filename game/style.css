@@ -193,6 +193,18 @@ button:active {
     margin-left: 5px;
 }
 
+.bonus-multiplier {
+    color: #ffcc00; /* Bright yellow/gold for bonus points */
+    text-shadow: 0 0 5px #ffcc00;
+    animation: bonusGlow 1s ease-in-out;
+}
+
+@keyframes bonusGlow {
+    0% { opacity: 0.5; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.05); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
 #input-line {
     display: flex;
     align-items: center;

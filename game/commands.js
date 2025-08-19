@@ -69,8 +69,8 @@ const commandDatabase = {
     'docker rmi',
     'docker network',
     'docker volume',
-    'docker-compose up',
-    'docker-compose down',
+    'docker compose up',
+    'docker compose down',
     'docker logs',
     'docker exec',
     'docker container',
@@ -79,7 +79,7 @@ const commandDatabase = {
     'kubectl get pods',
     'kubectl get services',
     'kubectl get deployments',
-    'kubectl apply -f',
+    'kubectl apply',
     'kubectl delete',
     'kubectl describe',
     'kubectl logs',
@@ -93,4 +93,11 @@ const commandDatabase = {
     'helm install',
     'helm list',
   ],
+};
+
+// Scoring multipliers for ecosystems (only define values above 1, defaults to 1)
+const ecosystemMultipliers = {
+  'Git': 2,            // Version control is more advanced
+  'Docker': 3,         // Container technology is complex
+  'Kubernetes': 5,     // Most complex orchestration commands
 };

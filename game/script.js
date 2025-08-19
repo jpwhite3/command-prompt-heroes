@@ -311,6 +311,12 @@ document.addEventListener('DOMContentLoaded', () => {
     startTimer();
   }
 
+  function startNormalGame() {
+    // Ensure demo mode is completely cleared when starting a normal game
+    isDemoMode = false;
+    startGame();
+  }
+
   function simulateTyping(command) {
     let i = 0;
     commandInput.value = '';
@@ -419,15 +425,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (commandFound) {
       usedCommands.add(trimmedCommand);
-      score++;
-      correctCommands++;
-      currentScoreDisplay.textContent = score;
+      
+      // Calculate points using ecosystem multipliers
+      let pointsEarned = 0;
       foundInEcosystems.forEach((eco) => {
+        const multiplier = ecosystemMultipliers[eco] || 1;
+        pointsEarned += multiplier;
+        
         const ecoSpan = document.createElement('span');
         ecoSpan.classList.add('ecosystem-check');
         ecoSpan.textContent = `[${eco}] ✓`;
         entryDiv.appendChild(ecoSpan);
+        
+        if (multiplier > 1) {
+          const bonusSpan = document.createElement('span');
+          bonusSpan.classList.add('bonus-multiplier');
+          bonusSpan.textContent = ` [${multiplier}x Bonus]`;
+          entryDiv.appendChild(bonusSpan);
+        }
       });
+      
+      score += pointsEarned;
+      correctCommands++;
+      currentScoreDisplay.textContent = score;
     } else {
       incorrectCommands++;
       const errorSpan = document.createElement('span');
@@ -505,7 +525,7 @@ document.addEventListener('DOMContentLoaded', () => {
   demoModeBtn.addEventListener('click', () => {
     activateDemoMode();
   });
-  readyYesBtn.addEventListener('click', startGame);
+  readyYesBtn.addEventListener('click', startNormalGame);
   readyNoBtn.addEventListener('click', showMenu);
   submitScoreBtn.addEventListener('click', submitScore);
   backToMenuBtn.addEventListener('click', showMenu);
